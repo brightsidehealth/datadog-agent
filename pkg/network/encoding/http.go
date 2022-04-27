@@ -59,7 +59,10 @@ func (e *httpEncoder) buildAggregations(payload *network.Connections) {
 	for key, stats := range payload.HTTP {
 		path := key.Path
 		method := key.Method
-		key.Path = ""
+		key.Path = http.Path{
+			Content:  "",
+			FullPath: true,
+		}
 		key.Method = http.MethodUnknown
 
 		aggregation, ok := e.aggregations[key]
@@ -77,7 +80,7 @@ func (e *httpEncoder) buildAggregations(payload *network.Connections) {
 		}
 
 		ms := &model.HTTPStats{
-			Path:                  path,
+			Path:                  path.Content,
 			Method:                model.HTTPMethod(method),
 			StatsByResponseStatus: e.getDataSlice(),
 		}
@@ -118,8 +121,8 @@ func httpKeyFromConn(c network.ConnectionStats) http.Key {
 	// to mimic the normalization heuristic done in the eBPF side (see `port_range.h`)
 	if (network.IsEphemeralPort(int(lport)) && !network.IsEphemeralPort(int(rport))) ||
 		(network.IsEphemeralPort(int(lport)) == network.IsEphemeralPort(int(rport)) && lport < rport) {
-		return http.NewKey(laddr, raddr, lport, rport, "", http.MethodUnknown)
+		return http.NewKey(laddr, raddr, lport, rport, "", true, http.MethodUnknown)
 	}
 
-	return http.NewKey(raddr, laddr, rport, lport, "", http.MethodUnknown)
+	return http.NewKey(raddr, laddr, rport, lport, "", true, http.MethodUnknown)
 }

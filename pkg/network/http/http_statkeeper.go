@@ -65,7 +65,7 @@ func (h *httpStatKeeper) GetAndResetAllStats() map[Key]RequestStats {
 }
 
 func (h *httpStatKeeper) add(tx httpTX) {
-	rawPath := tx.Path(h.buffer)
+	rawPath, fullPath := tx.Path(h.buffer)
 	if rawPath == nil {
 		atomic.AddInt64(&h.telemetry.malformed, 1)
 		return
@@ -76,7 +76,7 @@ func (h *httpStatKeeper) add(tx httpTX) {
 		return
 	}
 
-	key := h.newKey(tx, path)
+	key := h.newKey(tx, path, fullPath)
 	stats, ok := h.stats[key]
 	if !ok && len(h.stats) >= h.maxEntries {
 		atomic.AddInt64(&h.telemetry.dropped, 1)
@@ -131,7 +131,7 @@ func (h *httpStatKeeper) handleIncomplete(tx httpTX) {
 	delete(h.incomplete, key)
 }
 
-func (h *httpStatKeeper) newKey(tx httpTX, path string) Key {
+func (h *httpStatKeeper) newKey(tx httpTX, path string, fullPath bool) Key {
 	return Key{
 		SrcIPHigh: uint64(tx.tup.saddr_h),
 		SrcIPLow:  uint64(tx.tup.saddr_l),
@@ -139,8 +139,11 @@ func (h *httpStatKeeper) newKey(tx httpTX, path string) Key {
 		DstIPHigh: uint64(tx.tup.daddr_h),
 		DstIPLow:  uint64(tx.tup.daddr_l),
 		DstPort:   uint16(tx.tup.dport),
-		Path:      path,
-		Method:    Method(tx.request_method),
+		Path: Path{
+			Content:  path,
+			FullPath: fullPath,
+		},
+		Method: Method(tx.request_method),
 	}
 }
 

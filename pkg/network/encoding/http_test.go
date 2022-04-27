@@ -32,6 +32,7 @@ func TestFormatHTTPStats(t *testing.T) {
 		clientPort,
 		serverPort,
 		"/testpath-1",
+		true,
 		http.MethodGet,
 	)
 	var httpStats1 http.RequestStats
@@ -41,7 +42,10 @@ func TestFormatHTTPStats(t *testing.T) {
 	}
 
 	httpKey2 := httpKey1
-	httpKey2.Path = "/testpath-2"
+	httpKey2.Path = http.Path{
+		Content:  "/testpath-2",
+		FullPath: true,
+	}
 	var httpStats2 http.RequestStats
 	for i := range httpStats2 {
 		httpStats2[i].Count = 1
@@ -67,8 +71,9 @@ func TestFormatHTTPStats(t *testing.T) {
 	out := &model.HTTPAggregations{
 		EndpointAggregations: []*model.HTTPStats{
 			{
-				Path:   "/testpath-1",
-				Method: model.HTTPMethod_Get,
+				Path:     "/testpath-1",
+				Method:   model.HTTPMethod_Get,
+				FullPath: true,
 				StatsByResponseStatus: []*model.HTTPStats_Data{
 					{Count: 1, FirstLatencySample: 10, Latencies: nil},
 					{Count: 1, FirstLatencySample: 10, Latencies: nil},
@@ -78,8 +83,9 @@ func TestFormatHTTPStats(t *testing.T) {
 				},
 			},
 			{
-				Path:   "/testpath-2",
-				Method: model.HTTPMethod_Get,
+				Path:     "/testpath-2",
+				Method:   model.HTTPMethod_Get,
+				FullPath: true,
 				StatsByResponseStatus: []*model.HTTPStats_Data{
 					{Count: 1, FirstLatencySample: 20, Latencies: nil},
 					{Count: 1, FirstLatencySample: 20, Latencies: nil},
@@ -119,6 +125,7 @@ func TestFormatHTTPStatsByPath(t *testing.T) {
 		60000,
 		80,
 		"/testpath",
+		true,
 		http.MethodGet,
 	)
 

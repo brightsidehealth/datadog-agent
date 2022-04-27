@@ -156,7 +156,7 @@ func includesRequest(t *testing.T, allStats map[Key]RequestStats, req *nethttp.R
 	expectedStatus := testutil.StatusFromPath(req.URL.Path)
 	for key, stats := range allStats {
 		i := expectedStatus/100 - 1
-		if key.Path == req.URL.Path && stats[i].Count == 1 {
+		if key.Path.Content == req.URL.Path && stats[i].Count == 1 {
 			return
 		}
 	}

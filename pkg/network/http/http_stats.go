@@ -60,6 +60,11 @@ func (m Method) String() string {
 	}
 }
 
+type Path struct {
+	Content  string
+	FullPath bool
+}
+
 // Key is an identifier for a group of HTTP transactions
 type Key struct {
 	SrcIPHigh uint64
@@ -70,12 +75,12 @@ type Key struct {
 	DstIPLow  uint64
 	DstPort   uint16
 
-	Path   string
+	Path   Path
 	Method Method
 }
 
 // NewKey generates a new Key
-func NewKey(saddr, daddr util.Address, sport, dport uint16, path string, method Method) Key {
+func NewKey(saddr, daddr util.Address, sport, dport uint16, path string, fullPath bool, method Method) Key {
 	saddrl, saddrh := util.ToLowHigh(saddr)
 	daddrl, daddrh := util.ToLowHigh(daddr)
 	return Key{
@@ -85,8 +90,11 @@ func NewKey(saddr, daddr util.Address, sport, dport uint16, path string, method 
 		DstIPHigh: daddrh,
 		DstIPLow:  daddrl,
 		DstPort:   dport,
-		Path:      path,
-		Method:    method,
+		Path: Path{
+			Content:  path,
+			FullPath: fullPath,
+		},
+		Method: method,
 	}
 }
 
