@@ -15,17 +15,27 @@
 static __always_inline void read_into_buffer_skb(char *buffer, struct __sk_buff* skb, skb_info_t *info) {
     u64 offset = (u64)info->data_off;
 
+#define SKB_READ_SIZE (sizeof(__u64))
+
+    const int iter = HTTP_BUFFER_SIZE / SKB_READ_SIZE;
+    const u32 skb_len = skb->len;
+
+    u64 *buf = (void*)buffer;
+    int i = 0;
 #pragma unroll
-    for (int i = 0; i < HTTP_BUFFER_SIZE; i++) {
-        if (offset < skb->len) {
-            asm("r8 = *(u64 *)%[offset]\n\t"
-                "r0 = 0\n\t"
-                "r0 = *(u8 *)skb[r8]\n\t"
-                "*(u8 *)%[buffer] = r0\n\t"
-                : [buffer]"=m"(buffer[i])
-                : [offset]"m"(offset)
-                : "r0", "r1", "r2", "r3", "r4", "r5", "r8");
-        }
+    for (; i < iter; i++) {
+        if (offset + SKB_READ_SIZE > skb_len) break;
+
+        // Even though we're in the prebuilt version here, supported architectures should use
+        // little-endian byte ordering.
+        buf[i] = bpf_ntohll(((__u64)load_word(skb, offset) << 32) | (__u64)load_word(skb, offset + 4));
+        offset += SKB_READ_SIZE;
+    }
+
+#pragma unroll
+    for (int j = 0; j < SKB_READ_SIZE; j++) {
+        if (j >= (HTTP_BUFFER_SIZE - (SKB_READ_SIZE * i)) || offset >= skb_len) return;
+        buffer[(i * SKB_READ_SIZE) + j] = load_byte(skb, offset);
         offset++;
     }
 }
