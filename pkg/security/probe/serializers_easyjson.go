@@ -3931,8 +3931,6 @@ func easyjsonA970e379DecodeGithubComDataDogDatadogAgentPkgSecurityProbe29(in *jl
 			continue
 		}
 		switch key {
-		case "socket":
-			out.Socket = int32(in.Int32())
 		case "addr_family":
 			out.AddrFamily = string(in.String())
 		case "addr_port":
@@ -3954,13 +3952,8 @@ func easyjsonA970e379EncodeGithubComDataDogDatadogAgentPkgSecurityProbe29(out *j
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"socket\":"
-		out.RawString(prefix[1:])
-		out.Int32(int32(in.Socket))
-	}
-	{
 		const prefix string = ",\"addr_family\":"
-		out.RawString(prefix)
+		out.RawString(prefix[1:])
 		out.String(string(in.AddrFamily))
 	}
 	{
