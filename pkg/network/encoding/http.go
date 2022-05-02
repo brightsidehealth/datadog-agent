@@ -81,6 +81,7 @@ func (e *httpEncoder) buildAggregations(payload *network.Connections) {
 
 		ms := &model.HTTPStats{
 			Path:                  path.Content,
+			FullPath:              path.FullPath,
 			Method:                model.HTTPMethod(method),
 			StatsByResponseStatus: e.getDataSlice(),
 		}
