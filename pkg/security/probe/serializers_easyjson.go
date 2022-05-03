@@ -3933,10 +3933,16 @@ func easyjsonA970e379DecodeGithubComDataDogDatadogAgentPkgSecurityProbe29(in *jl
 		switch key {
 		case "addr_family":
 			out.AddrFamily = string(in.String())
-		case "addr_port":
-			out.AddrPort = uint16(in.Uint16())
 		case "addr":
-			out.Addr = string(in.String())
+			if in.IsNull() {
+				in.Skip()
+				out.Addr = nil
+			} else {
+				if out.Addr == nil {
+					out.Addr = new(IPPortSerializer)
+				}
+				(*out.Addr).UnmarshalEasyJSON(in)
+			}
 		default:
 			in.SkipRecursive()
 		}
@@ -3957,14 +3963,13 @@ func easyjsonA970e379EncodeGithubComDataDogDatadogAgentPkgSecurityProbe29(out *j
 		out.String(string(in.AddrFamily))
 	}
 	{
-		const prefix string = ",\"addr_port\":"
-		out.RawString(prefix)
-		out.Uint16(uint16(in.AddrPort))
-	}
-	{
 		const prefix string = ",\"addr\":"
 		out.RawString(prefix)
-		out.String(string(in.Addr))
+		if in.Addr == nil {
+			out.RawString("null")
+		} else {
+			(*in.Addr).MarshalEasyJSON(out)
+		}
 	}
 	out.RawByte('}')
 }
