@@ -15,7 +15,7 @@ SHELL ["pwsh", "-Command", "$ErrorActionPreference = 'Stop';"]
 COPY datadog-agent-latest.amd64.zip install.ps1 ./
 RUN . ./install.ps1
 
-EXPOSE 8125/udp 8126/tcp
+EXPOSE 8125/tcp 8126/tcp
 
 COPY entrypoint.exe C:/entrypoint.exe
 ADD entrypoint-ps1 ./entrypoint-ps1

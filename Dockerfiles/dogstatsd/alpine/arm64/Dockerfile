@@ -17,7 +17,7 @@ COPY dogstatsd.yaml /etc/datadog-agent/dogstatsd.yaml
 COPY install_info /etc/datadog-agent/install_info
 COPY static/dogstatsd /dogstatsd
 
-EXPOSE 8125/udp
+EXPOSE 8125/tcp
 
 HEALTHCHECK --interval=1m --timeout=5s --retries=2 \
   CMD ["/probe.sh"]

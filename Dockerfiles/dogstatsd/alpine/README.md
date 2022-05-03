@@ -79,7 +79,7 @@ spec:
         ports:
           - containerPort: 8125
             name: dogstatsdport
-            protocol: UDP
+            protocol: TCP
         env:
           - name: DD_API_KEY
             value: ___value___

@@ -33,7 +33,7 @@ spec:
           ports:
             - containerPort: 8125
               name: dogstatsdport
-              protocol: UDP
+              protocol: TCP
           env:
             # Needs to be removed when Agent N-2 is built with Golang 1.17
             - name: GODEBUG
