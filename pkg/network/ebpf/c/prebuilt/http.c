@@ -34,8 +34,15 @@ static __always_inline void read_into_buffer_skb(char *buffer, struct __sk_buff*
 
 #pragma unroll
     for (int j = 0; j < SKB_READ_SIZE; j++) {
-        if (j >= (HTTP_BUFFER_SIZE - (SKB_READ_SIZE * i)) || offset >= skb_len) return;
-        buffer[(i * SKB_READ_SIZE) + j] = load_byte(skb, offset);
+        if (j >= (HTTP_BUFFER_SIZE - (SKB_READ_SIZE * i)) || offset >= skb->len) return;
+
+        asm("r8 = *(u64 *)%[offset]\n\t"
+            "r0 = 0\n\t"
+            "r0 = *(u8 *)skb[r8]\n\t"
+            "*(u8 *)%[buffer] = r0\n\t"
+            : [buffer]"=m"(buffer[(i * SKB_READ_SIZE) + j])
+            : [offset]"m"(offset)
+            : "r0", "r1", "r2", "r3", "r4", "r5", "r8");
         offset++;
     }
 }
