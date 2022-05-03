@@ -16,6 +16,7 @@ import (
 	"github.com/DataDog/datadog-agent/pkg/logs/diagnostic"
 	"github.com/DataDog/datadog-agent/pkg/logs/internal/launchers"
 	"github.com/DataDog/datadog-agent/pkg/logs/internal/launchers/channel"
+	"github.com/DataDog/datadog-agent/pkg/logs/internal/launchers/container"
 	"github.com/DataDog/datadog-agent/pkg/logs/internal/launchers/docker"
 	filelauncher "github.com/DataDog/datadog-agent/pkg/logs/internal/launchers/file"
 	"github.com/DataDog/datadog-agent/pkg/logs/internal/launchers/journald"
@@ -79,19 +80,27 @@ func NewAgent(sources *config.LogSources, services *service.Services, processing
 	lnchrs.AddLauncher(journald.NewLauncher())
 	lnchrs.AddLauncher(windowsevent.NewLauncher())
 	lnchrs.AddLauncher(traps.NewLauncher())
-	lnchrs.AddLauncher(docker.NewLauncher(
-		time.Duration(coreConfig.Datadog.GetInt("logs_config.docker_client_read_timeout"))*time.Second,
-		sources,
-		services,
-		cop,
-		coreConfig.Datadog.GetBool("logs_config.docker_container_use_file"),
-		coreConfig.Datadog.GetBool("logs_config.docker_container_force_use_file")))
 	if !util.CcaInAD() {
+		lnchrs.AddLauncher(docker.NewLauncher(
+			time.Duration(coreConfig.Datadog.GetInt("logs_config.docker_client_read_timeout"))*time.Second,
+			sources,
+			services,
+			cop,
+			coreConfig.Datadog.GetBool("logs_config.docker_container_use_file"),
+			coreConfig.Datadog.GetBool("logs_config.docker_container_force_use_file")))
 		lnchrs.AddLauncher(kubernetes.NewLauncher(
 			sources,
 			services,
 			cop,
 			coreConfig.Datadog.GetBool("logs_config.container_collect_all")))
+	} else {
+		lnchrs.AddLauncher(container.NewLauncher(
+			time.Duration(coreConfig.Datadog.GetInt("logs_config.docker_client_read_timeout"))*time.Second,
+			sources,
+			services,
+			cop,
+			coreConfig.Datadog.GetBool("logs_config.docker_container_use_file"),
+			coreConfig.Datadog.GetBool("logs_config.docker_container_force_use_file")))
 	}
 
 	return &Agent{
